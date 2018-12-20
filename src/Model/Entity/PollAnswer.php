@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
@@ -8,7 +7,8 @@ use Cake\ORM\Entity;
  * PollAnswer Entity
  *
  * @property int $id
- * @property string $uniqid
+ * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\FrozenTime|null $modified
  * @property int $user_id
  * @property int $poll_proposal_id
  * @property int $poll_id
@@ -30,6 +30,13 @@ class PollAnswer extends Entity
      * @var array
      */
     protected $_accessible = [
-        '*' => true
+        'created' => true,
+        'modified' => true,
+        'user_id' => true,
+        'poll_proposal_id' => true,
+        'poll_id' => true,
+        'user' => true,
+        'poll_proposal' => true,
+        'poll' => true
     ];
 }

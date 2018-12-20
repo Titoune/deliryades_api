@@ -4,19 +4,20 @@ namespace App\Model\Entity;
 use Cake\ORM\Entity;
 
 /**
- * PollProposal Entity
+ * DiscussionComment Entity
  *
  * @property int $id
- * @property string|null $content
  * @property \Cake\I18n\FrozenTime|null $created
  * @property \Cake\I18n\FrozenTime|null $modified
- * @property int|null $poll_answer_count
- * @property int $poll_id
+ * @property string|null $content
+ * @property \Cake\I18n\FrozenTime|null $read_sender
+ * @property \Cake\I18n\FrozenTime|null $read_receiver
+ * @property int $sender_id
+ * @property int $receiver_id
  *
- * @property \App\Model\Entity\Poll $poll
- * @property \App\Model\Entity\PollAnswer[] $poll_answers
+ * @property \App\Model\Entity\User $user
  */
-class PollProposal extends Entity
+class DiscussionComment extends Entity
 {
 
     /**
@@ -29,12 +30,13 @@ class PollProposal extends Entity
      * @var array
      */
     protected $_accessible = [
-        'content' => true,
         'created' => true,
         'modified' => true,
-        'poll_answer_count' => true,
-        'poll_id' => true,
-        'poll' => true,
-        'poll_answers' => true
+        'content' => true,
+        'read_sender' => true,
+        'read_receiver' => true,
+        'sender_id' => true,
+        'receiver_id' => true,
+        'user' => true
     ];
 }

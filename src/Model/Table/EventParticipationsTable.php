@@ -7,25 +7,24 @@ use Cake\ORM\Table;
 use Cake\Validation\Validator;
 
 /**
- * PollAnswers Model
+ * EventParticipations Model
  *
  * @property \App\Model\Table\UsersTable|\Cake\ORM\Association\BelongsTo $Users
- * @property \App\Model\Table\PollProposalsTable|\Cake\ORM\Association\BelongsTo $PollProposals
- * @property \App\Model\Table\PollsTable|\Cake\ORM\Association\BelongsTo $Polls
+ * @property \App\Model\Table\EventsTable|\Cake\ORM\Association\BelongsTo $Events
  *
- * @method \App\Model\Entity\PollAnswer get($primaryKey, $options = [])
- * @method \App\Model\Entity\PollAnswer newEntity($data = null, array $options = [])
- * @method \App\Model\Entity\PollAnswer[] newEntities(array $data, array $options = [])
- * @method \App\Model\Entity\PollAnswer|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\PollAnswer|bool saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
- * @method \App\Model\Entity\PollAnswer patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
- * @method \App\Model\Entity\PollAnswer[] patchEntities($entities, array $data, array $options = [])
- * @method \App\Model\Entity\PollAnswer findOrCreate($search, callable $callback = null, $options = [])
+ * @method \App\Model\Entity\EventParticipation get($primaryKey, $options = [])
+ * @method \App\Model\Entity\EventParticipation newEntity($data = null, array $options = [])
+ * @method \App\Model\Entity\EventParticipation[] newEntities(array $data, array $options = [])
+ * @method \App\Model\Entity\EventParticipation|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method \App\Model\Entity\EventParticipation|bool saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method \App\Model\Entity\EventParticipation patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
+ * @method \App\Model\Entity\EventParticipation[] patchEntities($entities, array $data, array $options = [])
+ * @method \App\Model\Entity\EventParticipation findOrCreate($search, callable $callback = null, $options = [])
  *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
  * @mixin \Cake\ORM\Behavior\CounterCacheBehavior
  */
-class PollAnswersTable extends Table
+class EventParticipationsTable extends Table
 {
 
     /**
@@ -38,26 +37,21 @@ class PollAnswersTable extends Table
     {
         parent::initialize($config);
 
-        $this->setTable('poll_answers');
+        $this->setTable('event_participations');
         $this->setDisplayField('id');
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
         $this->addBehavior('CounterCache', [
-            'PollProposals' => ['poll_answer_count'],
-            'Polls' => ['poll_answer_count']
+            'Events' => ['event_participation_count']
         ]);
 
         $this->belongsTo('Users', [
             'foreignKey' => 'user_id',
             'joinType' => 'INNER'
         ]);
-        $this->belongsTo('PollProposals', [
-            'foreignKey' => 'poll_proposal_id',
-            'joinType' => 'INNER'
-        ]);
-        $this->belongsTo('Polls', [
-            'foreignKey' => 'poll_id',
+        $this->belongsTo('Events', [
+            'foreignKey' => 'event_id',
             'joinType' => 'INNER'
         ]);
     }
@@ -74,6 +68,9 @@ class PollAnswersTable extends Table
             ->integer('id')
             ->allowEmpty('id', 'create');
 
+        $validator
+            ->allowEmpty('event_participation_type');
+
         return $validator;
     }
 
@@ -87,8 +84,7 @@ class PollAnswersTable extends Table
     public function buildRules(RulesChecker $rules)
     {
         $rules->add($rules->existsIn(['user_id'], 'Users'));
-        $rules->add($rules->existsIn(['poll_proposal_id'], 'PollProposals'));
-        $rules->add($rules->existsIn(['poll_id'], 'Polls'));
+        $rules->add($rules->existsIn(['event_id'], 'Events'));
 
         return $rules;
     }

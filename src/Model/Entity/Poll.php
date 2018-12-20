@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
@@ -8,21 +7,16 @@ use Cake\ORM\Entity;
  * Poll Entity
  *
  * @property int $id
- * @property string $uniqid
- * @property int $city_id
- * @property string $title
- * @property string $question
- * @property string $description
- * @property \Cake\I18n\FrozenTime $expiration
- * @property bool $activated
- * @property \Cake\I18n\FrozenTime $created
- * @property \Cake\I18n\FrozenTime $modified
- * @property int $answer_count
- * @property int $proposal_count
- * @property bool $cron_in_progress
- * @property bool $notified
+ * @property string|null $question
+ * @property string|null $content
+ * @property \Cake\I18n\FrozenTime|null $expiration
+ * @property \Cake\I18n\FrozenTime|null $created
+ * @property \Cake\I18n\FrozenTime|null $modified
+ * @property int|null $poll_proposal_count
+ * @property int|null $poll_answer_count
+ * @property int $user_id
  *
- * @property \App\Model\Entity\City $city
+ * @property \App\Model\Entity\User $user
  * @property \App\Model\Entity\PollAnswer[] $poll_answers
  * @property \App\Model\Entity\PollProposal[] $poll_proposals
  */
@@ -39,43 +33,16 @@ class Poll extends Entity
      * @var array
      */
     protected $_accessible = [
-        '*' => true
+        'question' => true,
+        'content' => true,
+        'expiration' => true,
+        'created' => true,
+        'modified' => true,
+        'poll_proposal_count' => true,
+        'poll_answer_count' => true,
+        'user_id' => true,
+        'user' => true,
+        'poll_answers' => true,
+        'poll_proposals' => true
     ];
-
-    protected $_virtual = ['expiration_to_date_fr', 'expiration_to_time_fr'];
-
-
-    protected function _getExpirationToDateFr()
-    {
-        if ($this->expiration) {
-            return $this->expiration->i18nFormat('EEEE dd MMMM yyyy');
-        } else {
-            return null;
-        }
-    }
-
-    protected function _getExpirationToTimeFr()
-    {
-        if ($this->expiration) {
-            return $this->expiration->format('H:i');
-        } else {
-            return null;
-        }
-    }
-
-
-    protected function _setTitle($val)
-    {
-        return !empty($val) ? strip_tags(trim($val)) : null;
-    }
-
-    protected function _setQuestion($val)
-    {
-        return !empty($val) ? strip_tags(trim($val)) : null;
-    }
-
-    protected function _setDescription($val)
-    {
-        return !empty($val) ? strip_tags(trim($val)) : null;
-    }
 }

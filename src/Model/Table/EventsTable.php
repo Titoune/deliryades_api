@@ -1,9 +1,7 @@
 <?php
-
 namespace App\Model\Table;
 
-use App\Utility\Socket; use App\Utility\Firestore;
-use App\Utility\Tools;
+use Cake\ORM\Query;
 use Cake\ORM\RulesChecker;
 use Cake\ORM\Table;
 use Cake\Validation\Validator;
@@ -11,18 +9,19 @@ use Cake\Validation\Validator;
 /**
  * Events Model
  *
- * @property \App\Model\Table\CitiesTable|\Cake\ORM\Association\BelongsTo $Cities
+ * @property \App\Model\Table\UsersTable|\Cake\ORM\Association\BelongsTo $Users
+ * @property \App\Model\Table\EventParticipationsTable|\Cake\ORM\Association\HasMany $EventParticipations
  *
  * @method \App\Model\Entity\Event get($primaryKey, $options = [])
  * @method \App\Model\Entity\Event newEntity($data = null, array $options = [])
  * @method \App\Model\Entity\Event[] newEntities(array $data, array $options = [])
  * @method \App\Model\Entity\Event|bool save(\Cake\Datasource\EntityInterface $entity, $options = [])
+ * @method \App\Model\Entity\Event|bool saveOrFail(\Cake\Datasource\EntityInterface $entity, $options = [])
  * @method \App\Model\Entity\Event patchEntity(\Cake\Datasource\EntityInterface $entity, array $data, array $options = [])
  * @method \App\Model\Entity\Event[] patchEntities($entities, array $data, array $options = [])
  * @method \App\Model\Entity\Event findOrCreate($search, callable $callback = null, $options = [])
  *
  * @mixin \Cake\ORM\Behavior\TimestampBehavior
- * @mixin \Cake\ORM\Behavior\CounterCacheBehavior
  */
 class EventsTable extends Table
 {
@@ -38,16 +37,17 @@ class EventsTable extends Table
         parent::initialize($config);
 
         $this->setTable('events');
-
+        $this->setDisplayField('title');
         $this->setPrimaryKey('id');
 
         $this->addBehavior('Timestamp');
-        $this->addBehavior('Log');
-        $this->addBehavior('CounterCache', ['Cities' => ['event_count']]);
 
-        $this->belongsTo('Cities', [
-            'foreignKey' => 'city_id',
-
+        $this->belongsTo('Users', [
+            'foreignKey' => 'user_id',
+            'joinType' => 'INNER'
+        ]);
+        $this->hasMany('EventParticipations', [
+            'foreignKey' => 'event_id'
         ]);
     }
 
@@ -57,7 +57,6 @@ class EventsTable extends Table
      * @param \Cake\Validation\Validator $validator Validator instance.
      * @return \Cake\Validation\Validator
      */
-
     public function validationDefault(Validator $validator)
     {
         $validator
@@ -65,44 +64,85 @@ class EventsTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
-            ->scalar('uniqid')
-            ->maxLength('uniqid', 225)
-            ->allowEmpty('uniqid');
-
-        $validator
             ->scalar('title')
             ->maxLength('title', 255)
-            ->notEmpty('title', 'Ce champ est requis')
-            ->lengthBetween('title', [2, 254], 'Le champ doit contenir entre 2 et 254 caractères');
+            ->allowEmpty('title');
 
         $validator
             ->scalar('content')
-            ->notEmpty('content', 'Ce champ est requis')
-            ->lengthBetween('content', [2, 2000], 'Le champ doit contenir entre 2 et 2000 caractères');
+            ->allowEmpty('content');
 
         $validator
-            ->integer('type')
-            ->notEmpty('type');
+            ->dateTime('start')
+            ->allowEmpty('start');
 
         $validator
-            ->dateTime('start', 'ymd', null, 'Le champ doit être une date valide')
-            ->notEmpty('start', 'Ce champ est requis');
+            ->dateTime('end')
+            ->allowEmpty('end');
 
         $validator
-            ->dateTime('end', 'ymd', null, 'Le champ doit être une date valide')
-            ->notEmpty('end', 'Ce champ est requis');
+            ->decimal('price')
+            ->allowEmpty('price');
 
         $validator
-            ->boolean('activated')
-            ->allowEmpty('activated');
+            ->email('email')
+            ->allowEmpty('email');
 
         $validator
-            ->boolean('cron_in_progress')
-            ->allowEmpty('cron_in_progress');
+            ->scalar('cellphone')
+            ->maxLength('cellphone', 255)
+            ->allowEmpty('cellphone');
 
         $validator
-            ->boolean('notified')
-            ->allowEmpty('notified');
+            ->scalar('phone')
+            ->maxLength('phone', 255)
+            ->allowEmpty('phone');
+
+        $validator
+            ->scalar('street_number')
+            ->maxLength('street_number', 255)
+            ->allowEmpty('street_number');
+
+        $validator
+            ->scalar('route')
+            ->maxLength('route', 255)
+            ->allowEmpty('route');
+
+        $validator
+            ->scalar('postal_code')
+            ->maxLength('postal_code', 255)
+            ->allowEmpty('postal_code');
+
+        $validator
+            ->scalar('locality')
+            ->maxLength('locality', 255)
+            ->allowEmpty('locality');
+
+        $validator
+            ->scalar('country')
+            ->maxLength('country', 255)
+            ->allowEmpty('country');
+
+        $validator
+            ->scalar('country_short')
+            ->maxLength('country_short', 255)
+            ->allowEmpty('country_short');
+
+        $validator
+            ->decimal('lat')
+            ->allowEmpty('lat');
+
+        $validator
+            ->decimal('lng')
+            ->allowEmpty('lng');
+
+        $validator
+            ->integer('event_comment_count')
+            ->allowEmpty('event_comment_count');
+
+        $validator
+            ->integer('event_participation_count')
+            ->allowEmpty('event_participation_count');
 
         return $validator;
     }
@@ -116,50 +156,9 @@ class EventsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->existsIn(['city_id'], 'Cities'));
+        $rules->add($rules->isUnique(['email']));
+        $rules->add($rules->existsIn(['user_id'], 'Users'));
 
         return $rules;
     }
-
-    public function beforeSave($event, $entity, $options)
-    {
-        if ($entity->isNew() && !$entity->uniqid) {
-            $entity->uniqid = Tools::_getRandomHash();
-        }
-    }
-
-    public function afterSave($event, $entity, $options)
-    {
-        //(new Firestore())->insert($this->getTable(), $entity->uniqid, $entity->toArray());
-
-        $event = $this->find()->where(['Events.id' => $entity->id])->first();
-        if ($event) {
-            if ($entity->isNew()) {
-                (new Socket())->emit('/dynamic-' . $entity->city_id, 'event-create', ['event' => $event]);
-            } else {
-                (new Socket())->emit('/dynamic-' . $entity->city_id, 'event-update', ['event' => $event]);
-            }
-        }
-    }
-
-    public function beforeDelete($event, $entity, $options)
-    {
-        if (isset($options['type']) && $options['type'] == 'soft') {
-            $entity = $this->get($entity->id);
-            $entity->deleted = date('Y-m-d H:i:s');
-            $this->save($entity);
-            $event->stopPropagation();
-            $this->afterDelete($event, $entity, $options);
-            return true;
-        }
-    }
-
-    public function afterDelete($event, $entity, $options)
-    {
-        //(new Firestore())->delete($this->getTable(), $entity->uniqid);
-
-        (new Socket())->emit('/dynamic-' . $entity->city_id, 'event-delete', ['event' => $entity]);
-    }
-
-
 }
