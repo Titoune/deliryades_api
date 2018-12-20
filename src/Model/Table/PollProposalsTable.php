@@ -69,12 +69,8 @@ class PollProposalsTable extends Table
 
         $validator
             ->scalar('content')
-            ->maxLength('content', 255)
-            ->allowEmpty('content');
-
-        $validator
-            ->integer('poll_answer_count')
-            ->allowEmpty('poll_answer_count');
+            ->lengthBetween('content', [1, 250], 'Le champ doit contenir entre 1 et 250 caractères')
+            ->notEmpty('content');
 
         return $validator;
     }

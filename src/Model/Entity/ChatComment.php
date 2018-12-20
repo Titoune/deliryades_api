@@ -33,4 +33,9 @@ class ChatComment extends Entity
         'user_id' => true,
         'user' => true
     ];
+
+    protected function _setContent($val)
+    {
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
 }

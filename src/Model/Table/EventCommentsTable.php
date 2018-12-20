@@ -61,7 +61,9 @@ class EventCommentsTable extends Table
 
         $validator
             ->scalar('content')
-            ->allowEmpty('content');
+            ->notEmpty('content')
+            ->lengthBetween('content', [2, 2000], 'Le champ doit contenir entre 2 et 2000 caractères');
+
 
         return $validator;
     }

@@ -10,7 +10,6 @@ use Cake\Validation\Validator;
  * DiscussionComments Model
  *
  * @property \App\Model\Table\UsersTable|\Cake\ORM\Association\BelongsTo $Users
- * @property \App\Model\Table\UsersTable|\Cake\ORM\Association\BelongsTo $Users
  *
  * @method \App\Model\Entity\DiscussionComment get($primaryKey, $options = [])
  * @method \App\Model\Entity\DiscussionComment newEntity($data = null, array $options = [])
@@ -42,11 +41,13 @@ class DiscussionCommentsTable extends Table
 
         $this->addBehavior('Timestamp');
 
-        $this->belongsTo('Users', [
+        $this->belongsTo('Senders', [
+            'className' => 'Users',
             'foreignKey' => 'sender_id',
             'joinType' => 'INNER'
         ]);
-        $this->belongsTo('Users', [
+        $this->belongsTo('Receivers', [
+            'className' => 'Users',
             'foreignKey' => 'receiver_id',
             'joinType' => 'INNER'
         ]);
@@ -66,14 +67,16 @@ class DiscussionCommentsTable extends Table
 
         $validator
             ->scalar('content')
-            ->allowEmpty('content');
+            ->notEmpty('content')
+            ->lengthBetween('content', [2, 2000], 'Le champ doit contenir entre 2 et 2000 caractères');
+
 
         $validator
-            ->dateTime('read_sender')
+            ->dateTime('read_sender', 'ymd', null, 'Le champ doit être une date valide')
             ->allowEmpty('read_sender');
 
         $validator
-            ->dateTime('read_receiver')
+            ->dateTime('read_receiver', 'ymd', null, 'Le champ doit être une date valide')
             ->allowEmpty('read_receiver');
 
         return $validator;

@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Model\Entity;
 
 use Cake\ORM\Entity;
@@ -37,4 +38,9 @@ class PollProposal extends Entity
         'poll' => true,
         'poll_answers' => true
     ];
+
+    protected function _setContent($val)
+    {
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
 }

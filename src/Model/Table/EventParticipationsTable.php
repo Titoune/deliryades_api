@@ -69,7 +69,7 @@ class EventParticipationsTable extends Table
             ->allowEmpty('id', 'create');
 
         $validator
-            ->allowEmpty('event_participation_type');
+            ->notEmpty('event_participation_type');
 
         return $validator;
     }

@@ -45,4 +45,14 @@ class Poll extends Entity
         'poll_answers' => true,
         'poll_proposals' => true
     ];
+
+    protected function _setQuestion($val)
+    {
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
+
+    protected function _setContent($val)
+    {
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
 }

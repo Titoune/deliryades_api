@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Model\Table;
 
 use Cake\ORM\Query;
@@ -69,24 +70,18 @@ class PollsTable extends Table
 
         $validator
             ->scalar('question')
-            ->maxLength('question', 255)
-            ->allowEmpty('question');
+            ->lengthBetween('question', [2, 255], 'Le champ doit contenir entre 2 et 255 caractères')
+            ->notEmpty('question');
 
         $validator
             ->scalar('content')
-            ->allowEmpty('content');
+            ->notEmpty('content')
+            ->lengthBetween('content', [2, 5000], 'Le champ doit contenir entre 2 et 5000 caractères');
+
 
         $validator
-            ->dateTime('expiration')
-            ->allowEmpty('expiration');
-
-        $validator
-            ->integer('poll_proposal_count')
-            ->allowEmpty('poll_proposal_count');
-
-        $validator
-            ->integer('poll_answer_count')
-            ->allowEmpty('poll_answer_count');
+            ->dateTime('expiration', 'ymd', null, 'Le champ doit être une date valide')
+            ->notEmpty('expiration');
 
         return $validator;
     }

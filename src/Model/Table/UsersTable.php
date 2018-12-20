@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Model\Table;
 
 use Cake\ORM\Query;
@@ -80,22 +81,33 @@ class UsersTable extends Table
 
         $validator
             ->scalar('firstname')
-            ->maxLength('firstname', 255)
-            ->allowEmpty('firstname');
+            ->lengthBetween('firstname', [2, 60], 'Le champ doit contenir entre 2 et 60 caractères')
+            ->notEmpty('firstname');
 
         $validator
             ->scalar('lastname')
-            ->maxLength('lastname', 255)
-            ->allowEmpty('lastname');
+            ->lengthBetween('lastname', [2, 60], 'Le champ doit contenir entre 2 et 60 caractères')
+            ->notEmpty('lastname');
 
         $validator
             ->email('email')
             ->allowEmpty('email');
 
         $validator
-            ->scalar('password')
-            ->maxLength('password', 255)
-            ->allowEmpty('password');
+            ->scalar('password1')
+            ->allowEmpty('password1', 'update')
+            ->lengthBetween('password1', [2, 40], 'Le champ doit contenir entre 2 et 40 caractères');
+
+
+        $validator
+            ->scalar('password2')
+            ->allowEmpty('password2', 'update')
+            ->add('password2', [
+                'password2Match' => [
+                    'rule' => ['compareWith', 'password1'],
+                    'message' => 'Les mots de passe ne correspondent pas',
+                ]
+            ]);
 
         $validator
             ->dateTime('logged')
@@ -109,12 +121,9 @@ class UsersTable extends Table
         $validator
             ->scalar('sex')
             ->maxLength('sex', 1)
-            ->allowEmpty('sex');
+            ->allowEmpty('sex')
+            ->inList('sex', ['m', 'f', 'i'], 'veuillez choisir une option dans la liste');
 
-        $validator
-            ->scalar('token')
-            ->maxLength('token', 255)
-            ->allowEmpty('token');
 
         $validator
             ->scalar('street_number')
@@ -156,25 +165,33 @@ class UsersTable extends Table
 
         $validator
             ->scalar('cellphone')
-            ->maxLength('cellphone', 255)
-            ->allowEmpty('cellphone');
+            ->allowEmpty('cellphone')
+            ->add('cellphone', 'cellphoneFormat', [
+                'rule' => ['custom', '/^(?:(?:\+|00)33|0)\s*[6-7](?:[\s.-]*\d{2}){4}$/'],
+                'message' => "Seuls les numéros de mobile français sont acceptés"
+            ]);
 
         $validator
             ->scalar('phone')
-            ->maxLength('phone', 255)
-            ->allowEmpty('phone');
+            ->allowEmpty('phone')
+            ->add('phone', 'phoneFormat', [
+                'rule' => ['custom', '/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/'],
+                'message' => "Seuls les numéros de téléphone français sont acceptés"
+            ]);
 
         $validator
-            ->date('birth')
+            ->date('birth', 'ymd', 'Le champ doit être une date valide')
             ->allowEmpty('birth');
 
         $validator
-            ->date('death')
+            ->date('death', 'ymd', 'Le champ doit être une date valide')
             ->allowEmpty('death');
 
         $validator
             ->scalar('presentation')
-            ->allowEmpty('presentation');
+            ->allowEmpty('presentation')
+            ->maxLength('presentation', 10000);
+
 
         $validator
             ->scalar('branch')

@@ -1,6 +1,9 @@
 <?php
+
 namespace App\Model\Entity;
 
+use Cake\Auth\DefaultPasswordHasher;
+use Cake\I18n\FrozenDate;
 use Cake\ORM\Entity;
 
 /**
@@ -111,4 +114,126 @@ class User extends Entity
         'password',
         'token'
     ];
+
+    protected $_virtual = ['fullname', 'age', 'sex_to_text'];
+
+
+    protected function _getFullname()
+    {
+        if ($this->firstname && $this->lastname) {
+            return $this->firstname . ' ' . $this->lastname;
+        } else {
+            return null;
+        }
+    }
+
+    protected function _getSexToText()
+    {
+        if ($this->sex) {
+            if ($this->sex == 'm') {
+                return 'Homme';
+            } elseif ($this->sex == 'f') {
+                return 'Femme';
+            } elseif ($this->sex == 'i') {
+                return 'Indéfini';
+            }
+            return null;
+        } else {
+            return null;
+        }
+    }
+
+    protected function _getAge()
+    {
+        if (!$this->birth) {
+            return null;
+        }
+
+        return date_diff(date_create($this->birth->format('Y-m-d H:i:s')), date_create('today'))->y;
+    }
+
+    protected function _getBirthday()
+    {
+        if (!$this->birth) {
+            return null;
+        }
+
+        $today_day = date('m-d');
+        $birth_day = $this->birth->format('m-d');
+        $year = date('Y');
+
+        if ($birth_day < $today_day) :
+            $year++;
+        endif;
+
+        return new FrozenDate($year . '-' . $birth_day . ' 00:00:00');
+    }
+
+    protected function _setLastname($val)
+    {
+        return (!empty($val)) ? strip_tags(trim($val)) : null;
+    }
+
+
+    protected function _setFirstname($val)
+    {
+        return (!empty($val)) ? strip_tags(trim($val)) : null;
+    }
+
+
+    protected function _setEmail($val)
+    {
+        return (!empty($val)) ? mb_strtolower(strip_tags(trim($val)), 'UTF-8') : null;
+    }
+
+
+    protected function _setPassword($val)
+    {
+        return !empty($val) ? (new DefaultPasswordHasher())->hash($val) : null;
+    }
+
+
+    protected function _setPhone($val)
+    {
+        $val = str_replace(array(' ', '.', '-', '/'), '', $val);
+        if (substr($val, 0, 2) == '00') {
+            $val = '+' . substr($val, 2);
+        } elseif (substr($val, 0, 1) == '0') {
+            $val = '+33' . substr($val, 1);
+        }
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
+
+    protected function _getPhone($val)
+    {
+        if (substr($val, 0, 3) == '+33') {
+            $val = '0' . substr($val, 3);
+        }
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
+
+    protected function _setCellPhone($val)
+    {
+        $val = str_replace(array(' ', '.', '-', '/'), '', $val);
+        if (substr($val, 0, 2) == '00') {
+            $val = '+' . substr($val, 2);
+        } elseif (substr($val, 0, 1) == '0') {
+            $val = '+33' . substr($val, 1);
+        }
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
+
+    protected function _getCellphone($val)
+    {
+        if (substr($val, 0, 3) == '+33') {
+            $val = '0' . substr($val, 3);
+        }
+        return !empty($val) ? strip_tags(trim($val)) : null;
+    }
+
+
+    protected function _setPicture($val)
+    {
+        return (!empty($val)) ? trim($val) : null;
+    }
 }

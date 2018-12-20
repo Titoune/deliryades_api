@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Model\Table;
 
 use Cake\ORM\Query;
@@ -65,20 +66,22 @@ class EventsTable extends Table
 
         $validator
             ->scalar('title')
-            ->maxLength('title', 255)
-            ->allowEmpty('title');
+            ->lengthBetween('title', [2, 255], 'Le champ doit contenir entre 2 et 255 caractères')
+            ->notEmpty('title');
 
         $validator
             ->scalar('content')
-            ->allowEmpty('content');
+            ->notEmpty('content')
+            ->lengthBetween('content', [2, 2000], 'Le champ doit contenir entre 2 et 2000 caractères');
+
 
         $validator
-            ->dateTime('start')
-            ->allowEmpty('start');
+            ->dateTime('start', 'ymd', null, 'Le champ doit être une date valide')
+            ->notEmpty('start');
 
         $validator
-            ->dateTime('end')
-            ->allowEmpty('end');
+            ->dateTime('end', 'ymd', null, 'Le champ doit être une date valide')
+            ->notEmpty('end');
 
         $validator
             ->decimal('price')
@@ -90,13 +93,19 @@ class EventsTable extends Table
 
         $validator
             ->scalar('cellphone')
-            ->maxLength('cellphone', 255)
-            ->allowEmpty('cellphone');
+            ->allowEmpty('cellphone')
+            ->add('cellphone', 'cellphoneFormat', [
+                'rule' => ['custom', '/^(?:(?:\+|00)33|0)\s*[6-7](?:[\s.-]*\d{2}){4}$/'],
+                'message' => "Seuls les numéros de mobile français sont acceptés"
+            ]);
 
         $validator
             ->scalar('phone')
-            ->maxLength('phone', 255)
-            ->allowEmpty('phone');
+            ->allowEmpty('phone')
+            ->add('phone', 'phoneFormat', [
+                'rule' => ['custom', '/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/'],
+                'message' => "Seuls les numéros de téléphone français sont acceptés"
+            ]);
 
         $validator
             ->scalar('street_number')
@@ -136,14 +145,6 @@ class EventsTable extends Table
             ->decimal('lng')
             ->allowEmpty('lng');
 
-        $validator
-            ->integer('event_comment_count')
-            ->allowEmpty('event_comment_count');
-
-        $validator
-            ->integer('event_participation_count')
-            ->allowEmpty('event_participation_count');
-
         return $validator;
     }
 
@@ -156,7 +157,6 @@ class EventsTable extends Table
      */
     public function buildRules(RulesChecker $rules)
     {
-        $rules->add($rules->isUnique(['email']));
         $rules->add($rules->existsIn(['user_id'], 'Users'));
 
         return $rules;
