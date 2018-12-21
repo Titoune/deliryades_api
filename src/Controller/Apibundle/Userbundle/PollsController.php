@@ -28,9 +28,15 @@ class PollsController extends InitController
         parent::beforeFilter($event);
     }
 
-    public function getPolls($skip = 0)
+    public function getPolls($segment, $skip = 0)
     {
-        $polls = $this->Polls->find()->contain(['PollProposals']);
+        $this->Polls->hasOne('PollAnswer', ['className' => 'PollAnswers'])->setConditions(['PollAnswer.user_id' => $this->payloads->user->id]);
+        $polls = $this->Polls->find()->contain(['PollProposals', 'PollAnswer']);
+
+        if ($segment == 'mine') {
+            $polls->andWhere(['Polls.user_id' => $this->payloads->user->id]);
+        }
+
         $polls->order(['Polls.created' => 'desc'])->limit(20)->offset($skip);
 
         $this->api_response_data['polls'] = $polls;
@@ -64,7 +70,7 @@ class PollsController extends InitController
             'user_id' => $this->payloads->user->id
         ]);
 
-        $poll = $this->Polls->patchEntity($poll, $this->request->getData(), ['fields' => ['title', 'question', 'description', 'expiration', 'poll_proposals'], 'associated' => ['PollProposals' => ['fields' => ['content']]]]);
+        $poll = $this->Polls->patchEntity($poll, $this->request->getData(), ['fields' => ['question', 'content', 'expiration', 'poll_proposals'], 'associated' => ['PollProposals' => ['fields' => ['content']]]]);
 
         if ($r = $this->Polls->save($poll)) {
             $this->api_response_flash = "Votre sondage a bien été crée";
@@ -84,7 +90,7 @@ class PollsController extends InitController
 
             $original_poll_proposals = $poll->poll_proposals;
 
-            $poll = $this->Polls->patchEntity($poll, $this->request->getData(), ['fields' => ['title', 'question', 'description', 'expiration', 'poll_proposals'], 'associated' => ['PollProposals' => ['fields' => ['content']]]]);
+            $poll = $this->Polls->patchEntity($poll, $this->request->getData(), ['fields' => ['question', 'content', 'expiration', 'poll_proposals'], 'associated' => ['PollProposals' => ['fields' => ['content']]]]);
 
             if (!$poll->getErrors()) {
 

@@ -21,7 +21,7 @@ class ChatCommentsController extends InitController
 
     public function getChatComments($skip = 0)
     {
-        $chat_comments = $this->ChatComments->find();
+        $chat_comments = $this->ChatComments->find()->contain(['Users']);
         $chat_comments->order(['ChatComments.created' => 'asc'])->limit(100)->offset($skip);
         $this->api_response_data['chat_comments'] = $chat_comments;
     }

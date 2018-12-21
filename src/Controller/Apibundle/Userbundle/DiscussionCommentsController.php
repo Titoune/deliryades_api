@@ -20,8 +20,19 @@ class DiscussionCommentsController extends InitController
 
     public function getDiscussionComments($skip = 0)
     {
-        $discussion_comments = $this->DiscussionComments->find();
-        $discussion_comments->order(['DiscussionComments.created' => 'asc'])->limit(100)->offset($skip);
+        $discussion_comments = $this->DiscussionComments->find()->contain(['Senders', 'Receivers']);
+        $discussion_comments->order(['DiscussionComments.created' => 'asc'])->limit(10000000000)->offset($skip);
+
+        $discussion_comments = $discussion_comments->indexBy(function ($discussion_comment) {
+            if ($discussion_comment->sender_id >= $discussion_comment->receiver_id) {
+                return $discussion_comment->sender_id . '-' . $discussion_comment->receiver_id;
+            } else {
+                return $discussion_comment->receiver_id . '-' . $discussion_comment->sender_id;
+            }
+        });
+
+        $discussion_comments = array_values($discussion_comments->toArray());
+
         $this->api_response_data['discussion_comments'] = $discussion_comments;
     }
 
@@ -32,7 +43,7 @@ class DiscussionCommentsController extends InitController
                 ['DiscussionComments.sender_id' => $user_id],
                 ['DiscussionComments.receiver_id' => $user_id]
             ]
-        ]);
+        ])->contain(['Senders', 'Receivers']);
         $discussion_comments->order(['DiscussionComments.created' => 'asc'])->limit(100)->offset($skip);
         $this->api_response_data['discussion_comments'] = $discussion_comments;
     }
@@ -42,10 +53,10 @@ class DiscussionCommentsController extends InitController
         $this->request->allowMethod('post');
 
         $discussion_comment = $this->DiscussionComments->newEntity([
-            'user_id' => $this->payloads->user->id
+            'sender_id' => $this->payloads->user->id,
         ]);
 
-        $discussion_comment = $this->DiscussionComments->patchEntity($discussion_comment, $this->request->getData(), ['fields' => ['content']]);
+        $discussion_comment = $this->DiscussionComments->patchEntity($discussion_comment, $this->request->getData(), ['fields' => ['content', 'receiver_id']]);
 
         if ($r = $this->DiscussionComments->save($discussion_comment)) {
 
@@ -60,7 +71,7 @@ class DiscussionCommentsController extends InitController
     {
         $this->request->allowMethod('delete');
 
-        $discussion_comment = $this->DiscussionComments->find()->where(['DiscussionComments.id' => $discussion_comment_id, 'DiscussionComments.user_id' => $this->payloads->user->id])->first();
+        $discussion_comment = $this->DiscussionComments->find()->where(['DiscussionComments.id' => $discussion_comment_id, 'DiscussionComments.sender_id' => $this->payloads->user->id])->first();
 
         if (!$discussion_comment) {
             $this->api_response_code = 404;

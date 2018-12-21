@@ -119,14 +119,14 @@ class UsersController extends InitController
     public function uploadMayorPicture()
     {
 
-        $user = $this->Users->find()->where(['Users.id' => $this->payloads->current_user_id])->first();
+        $user = $this->Users->find()->where(['Users.id' => $this->payloads->user->id])->first();
         if ($user) {
 
             if (in_array($this->request->getData('file.type'), ['image/jpg', 'image/jpeg', 'image/png'])) {
 
                 if ($this->request->getData('file.size') < 500000000000000000) {
                     $path_info = pathinfo($this->request->getData('file.name'));
-                    $picture_final_folder = MEDIA_USER_PATH . $this->payloads->current_user_id;
+                    $picture_final_folder = MEDIA_USER_PATH . $this->payloads->user->id;
                     $picture_name = Tools::_getRandomFilename(15) . '.' . strtolower($path_info['extension']);
                     $picture_final_path = $picture_final_folder . DS . $picture_name;
 
@@ -136,7 +136,7 @@ class UsersController extends InitController
                             $user->picture = $picture_name;
                             if ($this->Users->save($user)) {
                                 if ($filename) {
-                                    array_map('unlink', glob(MEDIA_USER_PATH . $this->payloads->current_user_id . DS . $filename . "*"));
+                                    array_map('unlink', glob(MEDIA_USER_PATH . $this->payloads->user->id . DS . $filename . "*"));
                                 }
                             } else {
                                 $this->api_response_code = 400;
