@@ -33,10 +33,10 @@ class UsersController extends InitController
         $this->request->allowMethod('patch');
         $this->transformRequestData();
 
-        $user = $this->Users->find()->where(['Events.user_id' => $this->payloads->user->id])->first();
+        $user = $this->Users->find()->where(['Users.user_id' => $this->payloads->user->id])->first();
         if ($user) {
 
-            $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['firstname', 'lastname']]);
+            $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['firstname', 'lastname', 'email', 'sex', 'cellphone', 'phone', 'birth', 'death', 'presentation', 'branch', 'profession']]);
 
             if ($r = $this->Users->save($user)) {
                 $this->api_response_flash = "Votre profil a bien été modifié";
@@ -46,7 +46,48 @@ class UsersController extends InitController
             }
         } else {
             $this->api_response_code = 400;
-            $this->api_response_flash = "Compte introuvable introuvable";
+            $this->api_response_flash = "Compte introuvable";
+        }
+    }
+
+    public function setPasswordUpdateForm()
+    {
+        $this->request->allowMethod('patch');
+        $this->transformRequestData();
+
+        $user = $this->Users->find()->where(['Users.user_id' => $this->payloads->user->id])->first();
+        if ($user) {
+
+            $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['password1', 'password2']]);
+
+            if ($r = $this->Users->save($user)) {
+                $this->api_response_flash = "Votre mot de passe a bien été modifié";
+            } else {
+                $this->api_response_code = 400;
+                $this->api_response_data['_form']['errors'] = Tools::getErrors($user->getErrors());
+            }
+        } else {
+            $this->api_response_code = 400;
+            $this->api_response_flash = "Compte introuvable";
+        }
+    }
+
+    public function setUserField()
+    {
+        $this->request->allowMethod('patch');
+        $user = $this->Users->find()->where(['Users.id' => $this->payloads->user->id])->first();
+        if ($user) {
+            $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['firstname', 'lastname', 'email', 'sex', 'cellphone', 'phone', 'birth', 'death', 'presentation', 'branch', 'profession', 'notification_cellphone_anniversary', 'notification_cellphone_event', 'notification_cellphone_poll', 'notification_email_anniversary', 'notification_email_poll', 'notification_email_event']]);
+            if ($this->Users->save($user)) {
+
+            } else {
+                $this->api_response_code = 400;
+                $this->api_response_flash = "Veuillez vérifier le champ";
+            }
+
+        } else {
+            $this->api_response_code = 404;
+            $this->api_response_flash = "Utilisateur introuvable";
         }
     }
 
@@ -74,7 +115,7 @@ class UsersController extends InitController
 
     //////////////////////////////
 
-    public function getMayorMe($user_id)
+    public function getMe($user_id)
     {
         $user = $this->Users->find()->where(['Users.id' => $this->payloads->user->id])->first();
         if ($user) {
@@ -85,21 +126,6 @@ class UsersController extends InitController
         }
     }
 
-    public function getMayorByCityId($city_id = null)
-    {
-        $user = $this->Users->find()
-            ->contain(['Cities', 'Mayors', 'UserCvs' => ['sort' => ['UserCvs.year' => 'desc']]])
-            ->where(['Cities.id' => $this->payloads->current_city_id])
-            ->first();
-
-        if ($user) {
-            $this->api_response_data['user'] = $user;
-
-        } else {
-            $this->api_response_code = 404;
-            $this->api_response_flash = 'Enregistrement non trouvé';
-        }
-    }
 
     public function searchUserByEmail()
     {
