@@ -27,6 +27,16 @@ class UsersController extends InitController
         $this->api_response_data['users'] = $users;
     }
 
+    public function getUser($user_id)
+    {
+        $user = $this->Users->find()->where(['Users.id' => $user_id])->first();
+        if ($user) {
+            $this->api_response_data['user'] = $user;
+        } else {
+            $this->api_response_code = 400;
+        }
+    }
+
 
     public function setUpdateForm()
     {

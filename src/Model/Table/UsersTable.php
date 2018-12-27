@@ -65,6 +65,9 @@ class UsersTable extends Table
         $this->hasMany('Polls', [
             'foreignKey' => 'user_id'
         ]);
+        $this->hasMany('Devices', [
+            'foreignKey' => 'user_id'
+        ]);
     }
 
     /**
@@ -224,10 +227,6 @@ class UsersTable extends Table
         $validator
             ->allowEmpty('notification_email_event');
 
-        $validator
-            ->scalar('device_push_token')
-            ->maxLength('device_push_token', 255)
-            ->allowEmpty('device_push_token');
 
         return $validator;
     }
