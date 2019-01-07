@@ -24,11 +24,12 @@ class DevicesController extends InitController
         $device = $this->Devices->find()->where(['Devices.uuid' => $uuid, 'Devices.user_id' => $this->payloads->user->id])->first();
         if (!$device) {
             $device = $this->Devices->newEntity([
+                'uuid' => $uuid,
                 'user_id' => $this->payloads->user->id
             ]);
 
         }
-        $device = $this->Devices->patchEntity($device, $this->request->getData(), ['fields' => ['device_push_token', 'api', 'uuid', 'manufacturer', 'model', 'version', 'platform']]);
+        $device = $this->Devices->patchEntity($device, $this->request->getData(), ['fields' => ['device_push_token', 'api', 'manufacturer', 'model', 'version', 'platform']]);
 
         if ($r = $this->Devices->save($device)) {
         } else {

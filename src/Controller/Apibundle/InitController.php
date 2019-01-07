@@ -142,7 +142,7 @@ class InitController extends AppController
         $this->payloads = Tools::decodeJwt($this->jwt, 31536000);
 
         if (isset($this->payloads->user)) {
-            $check = $this->renewPrincipalSession($this->payloads->user->email, null);
+            $check = $this->renewPrincipalSession($this->payloads->user->cellphone, null);
 
             if ($check != true) {
                 return $check;
@@ -207,12 +207,12 @@ class InitController extends AppController
     }
 
 
-    protected function renewPrincipalSession($email, $password = null)
+    protected function renewPrincipalSession($cellphone, $password = null)
     {
         $this->loadModel('Users');
-        $user = $this->Users->find()->where(['Users.email' => $email])->first();
+        $user = $this->Users->find()->where(['Users.cellphone' => $cellphone])->first();
 
-        if ($user && $email) {
+        if ($user && $cellphone) {
             if ($password) {
                 $verify = (new DefaultPasswordHasher())->check($password, $user->password);
             } else {
