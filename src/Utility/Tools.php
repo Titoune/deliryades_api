@@ -153,10 +153,6 @@ class Tools
 
     public static function generateFirebaseRedirectLink($url)
     {
-        $url = str_replace('https://apidev.mairesetcitoyens.fr/', WEBSITE_URL, $url);
-        $url = str_replace('https://api.mairesetcitoyens.fr/', WEBSITE_URL, $url);
-        $url = str_replace('http://apimec.meridia/', WEBSITE_URL, $url);
-
         return FIREBASE_PAGE_LINK_DOMAIN . '?link=' . urlencode($url) . '&apn=' . ANDROID_PACKAGE_NAME . '&ibi=' . IOS_PACKAGE_NAME . '&afl=' . urlencode($url) . '&ifl=' . urlencode($url);
     }
 }

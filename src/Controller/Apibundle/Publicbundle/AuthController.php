@@ -43,12 +43,12 @@ class AuthController extends InitController
         $this->request->allowMethod('post');
         $user = $this->Users->find()->where(['Users.email' => $this->request->getData('email')])->first();
         if ($user) :
-            $url = $this->shortUrl(Router::url(['prefix' => 'publicbundle', 'controller' => 'Auth', 'action' => 'generatePassword', '?' => ['email' => $user->email, 'token' => $user->token]], true));
+            $url = $this->shortUrl(WEBSITE_URL . 'auth/generate-password/?email=' . $user->email . '&token=' . $user->token);
             $email = new Email('default');
             $email
                 ->setEmailFormat('html')
                 ->setTo($user->email)
-                ->setSubject(__('MairesetCitoyens.fr - Demande de modification de votre mot de passe'))
+                ->setSubject(__('Deliryades - Demande de modification de votre mot de passe'))
                 ->setTemplate('from_user_to_user_new_password')
                 ->setViewVars(['url' => $url, 'user' => $user]);
             if ($email->send()) {
@@ -86,7 +86,7 @@ class AuthController extends InitController
                     $email = new Email('default');
                     $email->setEmailFormat('html')
                         ->setTo($user->email)
-                        ->setSubject(__('MairesetCitoyens.fr - Modification de votre mot de passe'))
+                        ->setSubject(__('Deliryades - Modification de votre mot de passe'))
                         ->setTemplate('from_user_to_user_new_password_confirmation')
                         ->setViewVars(['user' => $user])
                         ->send();

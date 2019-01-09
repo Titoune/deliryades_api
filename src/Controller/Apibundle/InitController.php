@@ -336,9 +336,6 @@ class InitController extends AppController
             }
         } catch (\Exception $e) {
             unset($e);
-            $url = str_replace('https://apidev.mairesetcitoyens.fr/', WEBSITE_URL, $url);
-            $url = str_replace('https://api.mairesetcitoyens.fr/', WEBSITE_URL, $url);
-            $url = str_replace('http://apimec.meridia/', WEBSITE_URL, $url);
             return $url;
         }
     }
