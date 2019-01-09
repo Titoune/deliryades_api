@@ -34,7 +34,7 @@ class Firebase
     }
 
 
-    public function sendNotification(Array $devices, $title, $body, Array $datas)
+    public function sendNotification($devices, $title, $body, $datas)
     {
         $message = new Message();
         $message

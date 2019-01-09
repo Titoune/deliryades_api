@@ -5,6 +5,7 @@ namespace App\Shell;
 use App\Controller\Apibundle\InitController;
 use Cake\Console\Shell;
 use Cake\Mailer\Email;
+use App\Utility\Firebase;
 
 class CronShell extends Shell
 {
@@ -138,9 +139,24 @@ class CronShell extends Shell
 
 
         foreach ($birthdays AS $k => $birthday) {
+            $receivers = [];
             foreach ($users AS $user) {
                 foreach ($user->devices AS $device) {
-                    // envoi notif birthday
+                    if ($device->device_push_token) {
+                        $receivers[] = $device->device_push_token;
+                    }
+                }
+            }
+
+            if (!empty($receivers)) {
+                $title = 'Hello';
+                $body = $birthday->user->fullname . " fête son anniversaire aujourd'hui!";
+                $firebase = new Firebase();
+                $redirect_page = 'PublicLoginPage';
+                $redirect_params = null;
+                $response = $firebase->sendNotification($receivers, $title, $body, ['redirect_page' => $redirect_page, 'redirect_params' => $redirect_params, 'title' => $title, 'content' => $body]);
+                if ($response != 200) {
+
                 }
             }
 
@@ -161,13 +177,27 @@ class CronShell extends Shell
         }
 
         foreach ($events AS $event) {
+            $event->cellphone_notified = 1;
+            $receivers = [];
             foreach ($users AS $user) {
                 foreach ($user->devices AS $device) {
-                    // envoi notification phone
+                    if ($device->device_push_token) {
+                        $receivers[] = $device->device_push_token;
+                    }
                 }
             }
 
-            $event->cellphone_notified = 1;
+            if (!empty($receivers)) {
+                $title = 'Hello';
+                $body = $event->user->fullname . " a créé un évènement";
+                $firebase = new Firebase();
+                $redirect_page = 'PublicLoginPage';
+                $redirect_params = null;
+                $response = $firebase->sendNotification($receivers, $title, $body, ['redirect_page' => $redirect_page, 'redirect_params' => $redirect_params, 'title' => $title, 'content' => $body]);
+                if ($response != 200) {
+                    $event->cellphone_notified = 0;
+                }
+            }
             $this->Events->save($event);
         }
     }
@@ -186,13 +216,29 @@ class CronShell extends Shell
         }
 
         foreach ($polls AS $poll) {
+            $poll->cellphone_notified = 1;
+            $receivers = [];
+
             foreach ($users AS $user) {
                 foreach ($user->devices AS $device) {
-                    // envoi notif sondage
+                    if ($device->device_push_token) {
+                        $receivers[] = $device->device_push_token;
+                    }
                 }
             }
 
-            $poll->cellphone_notified = 1;
+            if (!empty($receivers)) {
+                $title = 'Hello';
+                $body = $poll->user->fullname . " a créé un sondage";
+                $firebase = new Firebase();
+                $redirect_page = 'PublicLoginPage';
+                $redirect_params = null;
+                $response = $firebase->sendNotification($receivers, $title, $body, ['redirect_page' => $redirect_page, 'redirect_params' => $redirect_params, 'title' => $title, 'content' => $body]);
+                if ($response != 200) {
+                    $poll->cellphone_notified = 0;
+                }
+            }
+            
             $this->Polls->save($poll);
         }
     }
