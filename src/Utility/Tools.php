@@ -153,6 +153,6 @@ class Tools
 
     public static function generateFirebaseRedirectLink($url)
     {
-        return FIREBASE_PAGE_LINK_DOMAIN . '?link=' . urlencode($url) . '&apn=' . ANDROID_PACKAGE_NAME . '&ibi=' . IOS_PACKAGE_NAME . '&afl=' . urlencode($url) . '&ifl=' . urlencode($url);
+        return FIREBASE_PAGE_LINK_DOMAIN . '?link=' . urlencode($url) . '&apn=' . ANDROID_PACKAGE_NAME . '&ibi=' . IOS_PACKAGE_NAME;
     }
 }

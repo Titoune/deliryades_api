@@ -41,71 +41,32 @@ class AuthController extends InitController
     public function setUserPasswordLostForm()
     {
         $this->request->allowMethod('post');
-        $user = $this->Users->find()->where(['Users.email' => $this->request->getData('email')])->first();
-        if ($user) :
-            $url = $this->shortUrl(WEBSITE_URL . 'auth/generate-password/?email=' . $user->email . '&token=' . $user->token);
+        $user = $this->Users->find()->where(['Users.cellphone' => $this->request->getData('cellphone')])->first();
+        if ($user) {
+            $password = rand(1000, 9999);
+            $url = $this->shortUrl(WEBSITE_URL);
             $email = new Email('default');
-            $email
-                ->setEmailFormat('html')
+            $email->setEmailFormat('html')
                 ->setTo($user->email)
-                ->setSubject(__('Deliryades - Demande de modification de votre mot de passe'))
-                ->setTemplate('from_user_to_user_new_password')
-                ->setViewVars(['url' => $url, 'user' => $user]);
+                ->setSubject("Deliryades - Mot de passe provisoire")
+                ->setTemplate('new_password')
+                ->setViewVars(['password' => $password, 'user' => $user, 'url' => $url]);
             if ($email->send()) {
-                $this->api_response_flash = "Vous allez recevoir dans quelques instants un lien de réinitialisation de votre mot de passe à l'adresse email indiquée.";
+                $user->password = $password;
+                if ($this->Users->save($user)) {
+                    $this->api_response_flash = "Vous allez recevoir dans quelques instants un mot de passe provisoire à l'adresse email indiquée sur votre profil.";
+                } else {
+                    $this->api_response_code = 400;
+                    $this->api_response_flash = "Une erreur est survenue lors de la génération d'un mot de passe aléatoire";
+                }
             } else {
                 $this->api_response_code = 400;
                 $this->api_response_flash = "Une erreur est survenue lors de l'envoi de l'email";
             }
-
-
-        else:
-            $this->api_response_code = 404;
-            $this->api_response_flash = 'Cette email ne correspond à aucun compte';
-        endif;
-
-    }
-
-
-    public function setUserPasswordRegenerateForm()
-    {
-        $this->request->allowMethod('post');
-
-        $user = $this->Users->find()->where(['Users.email' => $this->request->getData('email'), 'Users.token' => $this->request->getData('token')])->first();
-        if ($user) {
-            $user = $this->Users->patchEntity($user, $this->request->getData(), ['validate' => 'default', 'fields' => ['password1']]);
-            if (!$user->getErrors()) {
-                $user->token = Tools::_getRandomHash();
-                $user->password = $user->password1;
-                $user->login_attempt_count = 0;
-                $this->loadModel('LoginAttempts');
-                $this->LoginAttempts->deleteAll(['login' => $user->email]);
-                if ($this->Users->save($user)) {
-
-
-                    $email = new Email('default');
-                    $email->setEmailFormat('html')
-                        ->setTo($user->email)
-                        ->setSubject(__('Deliryades - Modification de votre mot de passe'))
-                        ->setTemplate('from_user_to_user_new_password_confirmation')
-                        ->setViewVars(['user' => $user])
-                        ->send();
-
-                    $this->api_response_flash = "Votre mot de passe est modifié";
-                } else {
-                    $this->api_response_code = 400;
-                    $this->api_response_flash = "Veuillez vérifier le formulaire";
-                }
-            } else {
-                $this->api_response_code = 400;
-                $this->api_response_flash = "Veuillez vérifier le formulaire";
-            }
-
         } else {
             $this->api_response_code = 404;
-            $this->api_response_flash = "Le token n'est pas valable";
+            $this->api_response_flash = 'Ce numéro ne correspond à aucun compte';
         }
-
     }
 
 
