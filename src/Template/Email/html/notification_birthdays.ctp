@@ -31,6 +31,7 @@
             <br>
             Son adresse : <?= $birthday->street_number ?> <?= $birthday->route ?> <?= $birthday->postal_code ?> <?= $birthday->locality ?> <?= $birthday->country ?>
         <?php endif ?>
+    <br><br>
     <?php endforeach; ?>
 </p>
 

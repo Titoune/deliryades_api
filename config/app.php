@@ -208,7 +208,7 @@ return [
             'username' => EMAIL_USERNAME,
             'password' => EMAIL_PASSWORD,
             'client' => null,
-            'tls' => null,
+            'tls' => false,
             'url' => env('EMAIL_TRANSPORT_DEFAULT_URL', null),
         ],
     ],
