@@ -43,10 +43,10 @@ class UsersController extends InitController
         $this->request->allowMethod('patch');
         $this->transformRequestData();
 
-        $user = $this->Users->find()->where(['Users.user_id' => $this->payloads->user->id])->first();
+        $user = $this->Users->find()->where(['Users.id' => $this->payloads->user->id])->first();
         if ($user) {
 
-            $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['firstname', 'lastname', 'email', 'sex', 'cellphone', 'phone', 'birth', 'death', 'presentation', 'branch', 'profession']]);
+            $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['firstname', 'lastname', 'email', 'sex', 'cellphone_prefix', 'cellphone', 'phone_prefix', 'phone', 'birth', 'death', 'presentation', 'branch', 'profession']]);
 
             if ($r = $this->Users->save($user)) {
                 $this->api_response_flash = "Votre profil a bien été modifié";
@@ -65,7 +65,7 @@ class UsersController extends InitController
         $this->request->allowMethod('patch');
         $this->transformRequestData();
 
-        $user = $this->Users->find()->where(['Users.user_id' => $this->payloads->user->id])->first();
+        $user = $this->Users->find()->where(['Users.id' => $this->payloads->user->id])->first();
         if ($user) {
 
             $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['password1', 'password2']]);

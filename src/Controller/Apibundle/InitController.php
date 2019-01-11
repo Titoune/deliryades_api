@@ -140,11 +140,16 @@ class InitController extends AppController
     public function renewSession()
     {
         $this->payloads = Tools::decodeJwt($this->jwt, 31536000);
-
         if (isset($this->payloads->user)) {
-            $check = $this->renewPrincipalSession($this->payloads->user->cellphone, null);
+            $check = false;
+            if ($this->payloads->user->cellphone) {
+                $check = $this->renewPrincipalSession($this->payloads->user->cellphone, null);
+            } elseif ($this->payloads->user->email) {
+                $check = $this->renewPrincipalSession($this->payloads->user->email, null);
+            }
 
-            if ($check != true) {
+
+            if ($check == true) {
                 return $check;
             }
         }
@@ -207,25 +212,25 @@ class InitController extends AppController
     }
 
 
-    protected function renewPrincipalSession($cellphone, $password = null)
+    protected function renewPrincipalSession($credential, $password = null)
     {
         $this->loadModel('Users');
-        $user = $this->Users->find()->where(['Users.cellphone' => $cellphone])->first();
-
-        if ($user && $cellphone) {
+        $user = $this->Users->find()->where([
+            'OR' => [
+                ['Users.cellphone' => trim($credential)],
+                ['Users.email' => trim($credential)]
+            ]
+        ])->first();
+        if ($user) {
             if ($password) {
                 $verify = (new DefaultPasswordHasher())->check($password, $user->password);
             } else {
                 $verify = true;
             }
 
-            if ($verify) {
+            if ($verify == true) {
                 $payloads = Tools::setPayload($user);
-                if ($user->admin == 1) {
-                    $payloads['user_type'] = 'administrator';
-                }else{
-                    $payloads['user_type'] = 'user';
-                }
+                $payloads['user_type'] = 'user';
 
                 $payloads['jwt'] = Tools::encodeJwt($this->payloads);
 
@@ -234,7 +239,6 @@ class InitController extends AppController
                 } else {
                     $this->payloads = $this->array_to_object($payloads);
                 }
-
                 $this->api_response_new_jwt = Tools::encodeJwt($this->payloads);
                 return true;
             } else {

@@ -41,7 +41,13 @@ class AuthController extends InitController
     public function setUserPasswordLostForm()
     {
         $this->request->allowMethod('post');
-        $user = $this->Users->find()->where(['Users.cellphone' => $this->request->getData('cellphone')])->first();
+        $user = $this->Users->find()->where([
+            'OR' => [
+                ['Users.cellphone' => $this->request->getData('cellphone')],
+                ['Users.email' => $this->request->getData('email')]
+            ]
+
+        ])->first();
         if ($user) {
             $password = rand(1000, 9999);
             $url = $this->shortUrl(WEBSITE_URL);
@@ -73,6 +79,6 @@ class AuthController extends InitController
     public function setUserLoginForm()
     {
         $this->request->allowMethod('post');
-        $this->renewPrincipalSession($this->request->getData('cellphone'), $this->request->getData('password'));
+        $this->renewPrincipalSession($this->request->getData('credential'), $this->request->getData('password'));
     }
 }
