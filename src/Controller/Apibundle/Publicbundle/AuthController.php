@@ -24,27 +24,14 @@ class AuthController extends InitController
         parent::beforeFilter($event);
     }
 
-    public function getUserForPasswordRegenerate($email = null, $token = null)
-    {
-        $this->request->allowMethod('post');
-        $user = $this->Users->find()->where(['Users.email' => $this->request->getData('email'), 'Users.token' => $this->request->getData('token')])->first();
-
-        if ($user) {
-            $this->api_response_data['user'] = $user;
-        } else {
-            $this->api_response_code = 404;
-            $this->api_response_flash = "Utilisateur introuvable";
-        }
-    }
-
 
     public function setUserPasswordLostForm()
     {
         $this->request->allowMethod('post');
         $user = $this->Users->find()->where([
             'OR' => [
-                ['Users.cellphone' => $this->request->getData('cellphone')],
-                ['Users.email' => $this->request->getData('email')]
+                ['Users.cellphone' => $this->request->getData('credential')],
+                ['Users.email' => $this->request->getData('credential')]
             ]
 
         ])->first();
