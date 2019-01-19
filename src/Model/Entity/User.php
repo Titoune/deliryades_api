@@ -132,9 +132,10 @@ class User extends Entity
 
         return [
             'xs' => $pic_url . "&width=60&height=60",
-            'sm' => $pic_url . "&width=60&height=60",
-            'md' => $pic_url . "&width=100&height=100",
-            'lg' => $pic_url . "&width=120&height=120",
+            'sm' => $pic_url . "&width=120&height=120",
+            'md' => $pic_url . "&width=150&height=150",
+            'lg' => $pic_url . "&width=200&height=200",
+
             'default' => $pic_url,
         ];
 
