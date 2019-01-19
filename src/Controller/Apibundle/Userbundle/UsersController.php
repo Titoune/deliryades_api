@@ -171,8 +171,9 @@ class UsersController extends InitController
                             $filename = pathinfo($user->picture, PATHINFO_FILENAME);
                             $user->picture = $picture_name;
                             if ($this->Users->save($user)) {
-
-                                array_map('unlink', glob(MEDIA_USER_PATH . $this->payloads->user->id . DS . $filename . "*"));
+                                if ($filename) {
+                                    array_map('unlink', glob(MEDIA_USER_PATH . $this->payloads->user->id . DS . $filename . "*"));
+                                }
                             } else {
                                 $this->api_response_code = 400;
                                 $this->api_response_flash = "Une erreur est survenue lors de la sauvegarde de la photo";
