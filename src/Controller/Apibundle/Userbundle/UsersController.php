@@ -152,9 +152,9 @@ class UsersController extends InitController
     }
 
 
-    public function uploadMayorPicture()
+    public function uploadUserPicture()
     {
-
+        $this->request->allowMethod('post');
         $user = $this->Users->find()->where(['Users.id' => $this->payloads->user->id])->first();
         if ($user) {
 
@@ -171,9 +171,8 @@ class UsersController extends InitController
                             $filename = pathinfo($user->picture, PATHINFO_FILENAME);
                             $user->picture = $picture_name;
                             if ($this->Users->save($user)) {
-                                if ($filename) {
-                                    array_map('unlink', glob(MEDIA_USER_PATH . $this->payloads->user->id . DS . $filename . "*"));
-                                }
+
+                                array_map('unlink', glob(MEDIA_USER_PATH . $this->payloads->user->id . DS . $filename . "*"));
                             } else {
                                 $this->api_response_code = 400;
                                 $this->api_response_flash = "Une erreur est survenue lors de la sauvegarde de la photo";
@@ -202,4 +201,5 @@ class UsersController extends InitController
             $this->api_response_flash = "Utilisateur introuvable, veuillez réessayer";
         }
     }
+
 }
