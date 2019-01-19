@@ -64,7 +64,7 @@ Router::scope('/api/public', ['prefix' => 'apibundle/publicbundle', 'allowWithou
 
 
 Router::scope('/', ['prefix' => 'publicbundle'], function (RouteBuilder $routes) {
-  $routes->connect('/image/*', ['controller' => 'Images', 'action' => 'image']);
+  $routes->connect('/image', ['controller' => 'Images', 'action' => 'image']);
     $routes->fallbacks(DashedRoute::class);
 });
 

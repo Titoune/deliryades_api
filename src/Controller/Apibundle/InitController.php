@@ -299,7 +299,7 @@ class InitController extends AppController
         foreach ($this->request->getData() AS $k => $d) {
             if (is_string($d) && (in_array(strlen($d), [20, 24, 25]))) {
                 preg_match('/(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})\.(\d{3})Z/', $d, $match);
-                if ($match[0]) {
+                if (isset($match[0])) {
                     $this->request->data[$k] = date('Y-m-d H:i:s', strtotime($match[0]));
                 }
                 preg_match('/(\d{4})-(\d{2})-(\d{2})T(\d{2})\:(\d{2})\:(\d{2})\+(\d{2})\:(\d{2})/', $d, $match);

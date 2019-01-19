@@ -1,6 +1,6 @@
 <p style="font-family: arial; color:#292929; font-size:14px; line-height:20px; margin-bottom:10px; text-align: left;">
     <?= __("Bonjour {0}", [$user->fullname]) ?>,<br>
-    <?= __("Vous avez demander un nouveau mot de passe"); ?>
+    <?= __("Vous avez demandé un nouveau mot de passe"); ?>
 </p>
 
 <p style="font-family: arial; color:#292929; font-size:14px; line-height:20px; margin-bottom:10px; text-align: center;">

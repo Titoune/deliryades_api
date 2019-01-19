@@ -115,8 +115,30 @@ class User extends Entity
         'token'
     ];
 
-    protected $_virtual = ['fullname', 'age', 'sex_to_text'];
+    protected $_virtual = ['fullname', 'age', 'sex_to_text', 'picture_sizes'];
 
+    protected function _getPicture_sizes()
+    {
+        if ($this->picture) {
+            $pic_url = IMAGE_RESIZE_URL . urlencode( 'users' . DS . $this->id . DS . $this->picture);
+        } else {
+
+            if ($this->sex == 'f') {
+                $pic_url = IMAGE_RESIZE_URL . urlencode('womman.jpg');
+            } else {
+                $pic_url = IMAGE_RESIZE_URL . urlencode('man.jpg');
+            }
+        }
+
+        return [
+            'xs' => $pic_url . "&width=60&height=60",
+            'sm' => $pic_url . "&width=60&height=60",
+            'md' => $pic_url . "&width=100&height=100",
+            'lg' => $pic_url . "&width=120&height=120",
+            'default' => $pic_url,
+        ];
+
+    }
 
     protected function _getFullname()
     {
