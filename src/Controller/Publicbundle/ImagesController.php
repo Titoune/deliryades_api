@@ -16,23 +16,28 @@ class ImagesController extends InitController
     public function image()
     {
         $response = $this->response->withStatus(404);
-        $path = $this->request->getQuery('img');
-        $picture_dirname = pathinfo($path)['dirname'];
-        $picture_name = pathinfo($path)['filename'];
-        $picture_extension = pathinfo($path)['extension'];
-
+        $query_param = $this->request->getQuery('img');
+        $picture_dirname = pathinfo($query_param)['dirname'];
+        $picture_name = pathinfo($query_param)['filename'];
+        $picture_extension = pathinfo($query_param)['extension'];
         $picture_width = $this->request->getQuery('width');
         $picture_height = $this->request->getQuery('height');
 
+        $original_img_path = WWW_ROOT . 'img' . DS . $picture_dirname . DS . $picture_name . '.' . $picture_extension;
 
-        if (file_exists(WWW_ROOT . 'img' . DS . $path)) {
+        if ($picture_width && $picture_height) {
+            $path = WWW_ROOT . 'img' . DS . $picture_dirname . DS . $picture_name . '_' . $picture_width . 'x' . $picture_height . '.' . $picture_extension;
+        } else {
+            $path = $original_img_path;
+        }
+
+        if (file_exists($path)) {
             $response = $this->response
-                ->withFile(WWW_ROOT . 'img' . DS . $path)
+                ->withFile($path)
                 ->withStatus(200);
         } else {
-
             $manager = new ImageManager(['driver' => 'imagick']);
-            $generated_picture = $manager->make(WWW_ROOT . 'img' . DS . $path);
+            $generated_picture = $manager->make($original_img_path);
             $generated_picture->resize($picture_width, null, function ($constraint) {
                 $constraint->aspectRatio();
             });
@@ -45,9 +50,9 @@ class ImagesController extends InitController
                 }
             }
 
-            $generated_picture->save(WWW_ROOT . 'img' . DS . $picture_dirname . DS . $picture_name . '_' . $picture_width . 'x' . $picture_height . '.' . $picture_extension);
+            $generated_picture->save($path);
             $response = $this->response
-                ->withFile(WWW_ROOT . 'img' . DS . $picture_dirname . DS . $picture_name . '_' . $picture_width . 'x' . $picture_height . '.' . $picture_extension)
+                ->withFile($path)
                 ->withStatus(200);
         }
 
