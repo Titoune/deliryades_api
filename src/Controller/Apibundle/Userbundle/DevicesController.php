@@ -21,15 +21,15 @@ class DevicesController extends InitController
     public function setUpdateForm($uuid)
     {
         $this->request->allowMethod('patch');
-        $device = $this->Devices->find()->where(['Devices.uuid' => $uuid, 'Devices.user_id' => $this->payloads->user->id])->first();
+        $device = $this->Devices->find()->where(['Devices.uuid' => $uuid, 'Devices.user_id' => $this->request->getData('user_id')])->first();
         if (!$device) {
             $device = $this->Devices->newEntity([
                 'uuid' => $uuid,
-                'user_id' => $this->payloads->user->id
+                'user_id' => $this->request->getData('user_id')
             ]);
 
         }
-        $device = $this->Devices->patchEntity($device, $this->request->getData(), ['fields' => ['device_push_token', 'api', 'manufacturer', 'model', 'version', 'platform']]);
+        $device = $this->Devices->patchEntity($device, $this->request->getData(), ['fields' => ['user_id', 'device_push_token', 'api', 'manufacturer', 'model', 'version', 'platform']]);
 
         if ($r = $this->Devices->save($device)) {
         } else {
