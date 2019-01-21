@@ -238,8 +238,40 @@ class CronShell extends Shell
                     $poll->cellphone_notified = 0;
                 }
             }
-            
+
             $this->Polls->save($poll);
+        }
+    }
+
+    public function tmp()
+    {
+        $this->loadModel('Users');
+        $users = $this->Users->find();
+        foreach ($users AS $user) {
+            if ($user->sex == 0) {
+                $user->sex = 'm';
+            } else {
+                $user->sex = 'f';
+            }
+
+            $user->picture = null;
+            $user->cellphone_prefix = '+33';
+            $user->phone_prefix = '+33';
+            $user->password = '5985';
+            if ($user->cellphone) {
+                if (substr($user->cellphone, 0, 2) == 33) {
+                    $user->cellphone = '0' . substr($user->cellphone, 2);
+                }
+            }
+
+
+            if ($user->phone) {
+                if (substr($user->phone, 0, 2) == 33) {
+                    $user->phone = '0' . substr($user->phone, 2);
+                }
+            }
+            $this->Users->save($user);
+
         }
     }
 }
