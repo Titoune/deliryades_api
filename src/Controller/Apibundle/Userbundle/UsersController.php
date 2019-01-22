@@ -60,6 +60,59 @@ class UsersController extends InitController
         }
     }
 
+    public function adminSetCreateForm()
+    {
+        $this->request->allowMethod('post');
+
+        if ($this->payloads->user->admin == 1) {
+            $this->transformRequestData();
+
+            $user = $this->Users->newEntity();
+            $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['firstname', 'lastname', 'email', 'sex', 'cellphone_prefix', 'cellphone', 'phone_prefix', 'phone', 'birth', 'death', 'presentation', 'branch', 'profession', 'street_number', 'route', 'postal_code', 'locality', 'country', 'lat', 'lng']]);
+
+            if ($r = $this->Users->save($user)) {
+                $this->api_response_flash = "L'utilisateur à bien été crée";
+            } else {
+                $this->api_response_code = 400;
+                $this->api_response_data['_form']['errors'] = Tools::getErrors($user->getErrors());
+            }
+        } else {
+            $this->api_response_code = 400;
+            $this->api_response_flash = "Opération non autorisée";
+
+        }
+
+    }
+
+    public function adminSetUpdateForm($user_id)
+    {
+        $this->request->allowMethod('patch');
+        if ($this->payloads->user->admin == 1) {
+            $this->transformRequestData();
+
+            $user = $this->Users->find()->where(['Users.id' => $user_id])->first();
+            if ($user) {
+
+                $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['firstname', 'lastname', 'email', 'sex', 'cellphone_prefix', 'cellphone', 'phone_prefix', 'phone', 'birth', 'death', 'presentation', 'branch', 'profession', 'street_number', 'route', 'postal_code', 'locality', 'country', 'lat', 'lng']]);
+
+                if ($r = $this->Users->save($user)) {
+                    $this->api_response_flash = "L'utilisateur a bien été modifié";
+                } else {
+                    $this->api_response_code = 400;
+                    $this->api_response_data['_form']['errors'] = Tools::getErrors($user->getErrors());
+                }
+            } else {
+                $this->api_response_code = 400;
+                $this->api_response_flash = "Compte introuvable";
+            }
+        } else {
+            $this->api_response_code = 400;
+            $this->api_response_flash = "Opération non autorisée";
+        }
+
+    }
+
+
     public function setPasswordUpdateForm()
     {
         $this->request->allowMethod('patch');
@@ -200,6 +253,64 @@ class UsersController extends InitController
         } else {
             $this->api_response_code = 400;
             $this->api_response_flash = "Utilisateur introuvable, veuillez réessayer";
+        }
+    }
+
+
+    public function adminUploadUserPicture($user_id)
+    {
+        $this->request->allowMethod('post');
+
+        if ($this->payloads->user->admin == 1) {
+            $user = $this->Users->find()->where(['Users.id' => $user_id])->first();
+            if ($user) {
+
+                if (in_array($this->request->getData('file.type'), ['image/jpg', 'image/jpeg', 'image/png'])) {
+
+                    if ($this->request->getData('file.size') < 500000000000000000) {
+                        $path_info = pathinfo($this->request->getData('file.name'));
+                        $picture_final_folder = MEDIA_USER_PATH . $this->payloads->user->id;
+                        $picture_name = Tools::_getRandomFilename(15) . '.' . strtolower($path_info['extension']);
+                        $picture_final_path = $picture_final_folder . DS . $picture_name;
+
+                        if ($this->createFolderIfNotExist($picture_final_folder)) {
+                            if (move_uploaded_file($this->request->getData('file.tmp_name'), $picture_final_path)) {
+                                $filename = pathinfo($user->picture, PATHINFO_FILENAME);
+                                $user->picture = $picture_name;
+                                if ($this->Users->save($user)) {
+                                    if ($filename) {
+                                        array_map('unlink', glob(MEDIA_USER_PATH . $user->id . DS . $filename . "*"));
+                                    }
+                                } else {
+                                    $this->api_response_code = 400;
+                                    $this->api_response_flash = "Une erreur est survenue lors de la sauvegarde de la photo";
+                                }
+
+                            } else {
+                                $this->api_response_code = 400;
+                                $this->api_response_flash = "Une erreur est survenue lors du déplacement de la photo";
+                            }
+                        } else {
+                            $this->api_response_code = 400;
+                            $this->api_response_flash = "Une erreur est survenue lors de l'upload, veuillez réessayer";
+                        }
+                    } else {
+                        $this->api_response_code = 400;
+                        $this->api_response_flash = "La taille maximum de photo autorisé est de 20 mo";
+                    }
+
+                } else {
+                    $this->api_response_code = 400;
+                    $this->api_response_flash = "Veuillez vérifier le type de fichier";
+                }
+
+            } else {
+                $this->api_response_code = 400;
+                $this->api_response_flash = "Utilisateur introuvable, veuillez réessayer";
+            }
+        } else {
+            $this->api_response_code = 400;
+            $this->api_response_flash = "Opération non autorisée";
         }
     }
 
