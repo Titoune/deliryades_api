@@ -23,7 +23,7 @@ class UsersController extends InitController
     public function getUsers($skip = 0)
     {
         $users = $this->Users->find();
-        $users->order(['Users.lastname' => 'asc'])->limit(100)->offset($skip);
+        $users->order(['Users.firstname' => 'asc'])->limit(100)->offset($skip);
         $this->api_response_data['users'] = $users;
     }
 
