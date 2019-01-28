@@ -23,13 +23,13 @@ class UsersController extends InitController
     public function getUsers($skip = 0)
     {
         $users = $this->Users->find();
-        $users->order(['Users.firstname' => 'asc'])->limit(100)->offset($skip);
+        $users->where(['Users.family_id' => $this->payloads->user->family_id])->order(['Users.firstname' => 'asc'])->limit(100)->offset($skip);
         $this->api_response_data['users'] = $users;
     }
 
     public function getUser($user_id)
     {
-        $user = $this->Users->find()->where(['Users.id' => $user_id])->first();
+        $user = $this->Users->find()->where(['Users.id' => $user_id])->andWhere(['Users.family_id' => $this->payloads->user->family_id])->first();
         if ($user) {
             $this->api_response_data['user'] = $user;
         } else {
@@ -160,7 +160,7 @@ class UsersController extends InitController
 
         $this->request->allowMethod('post');
 
-        $users = $this->Users->find();
+        $users = $this->Users->find()->where(['Users.family_id' => $this->payloads->user->family_id]);
 
         $terms = $this->request->getData('terms');
         $users->andWhere(function ($exp, $query) use ($terms) {

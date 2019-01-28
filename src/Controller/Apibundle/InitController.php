@@ -227,20 +227,24 @@ class InitController extends AppController
             } else {
                 $verify = true;
             }
-
             if ($verify == true) {
-                $payloads = Tools::setPayload($user);
-                $payloads['user_type'] = 'user';
+                if ($user->registered == 1) {
+                    $payloads = Tools::setPayload($user);
+                    $payloads['user_type'] = 'user';
 
-                $payloads['jwt'] = Tools::encodeJwt($this->payloads);
+                    $payloads['jwt'] = Tools::encodeJwt($this->payloads);
 
-                if ($this->payloads) {
-                    $this->payloads = $this->array_to_object(array_merge((array)$payloads, (array)$this->payloads));
+                    if ($this->payloads) {
+                        $this->payloads = $this->array_to_object(array_merge((array)$payloads, (array)$this->payloads));
+                    } else {
+                        $this->payloads = $this->array_to_object($payloads);
+                    }
+                    $this->api_response_new_jwt = Tools::encodeJwt($this->payloads);
+                    return true;
                 } else {
-                    $this->payloads = $this->array_to_object($payloads);
+                    $this->api_response_flash = "Veuillez valider votre adresse email";
                 }
-                $this->api_response_new_jwt = Tools::encodeJwt($this->payloads);
-                return true;
+
             } else {
                 $this->api_response_flash = "Login incorrect";
             }
@@ -339,6 +343,7 @@ class InitController extends AppController
                 return $url;
             }
         } catch (\Exception $e) {
+            $this->log($e);
             unset($e);
             return $url;
         }

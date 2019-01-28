@@ -146,7 +146,8 @@ class Tools
                 'firstname' => $user->firstname,
                 'lastname' => $user->lastname,
                 'picture_sizes' => $user->picture_sizes,
-                'admin' => $user->admin
+                'admin' => $user->admin,
+                'family_id' => $user->family_id
             ]
         ];
     }

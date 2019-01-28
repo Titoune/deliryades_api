@@ -68,4 +68,65 @@ class AuthController extends InitController
         $this->request->allowMethod('post');
         $this->renewPrincipalSession($this->request->getData('credential'), $this->request->getData('password'));
     }
+
+    public function setRegistrationForm()
+    {
+        $this->request->allowMethod('post');
+
+        $user = $this->Users->newEntity([
+            'registered' => 0,
+            'token' => Tools::_getRandomHash()
+        ]);
+
+
+        $user = $this->Users->patchEntity($user, $this->request->getData(), ['fields' => ['sex', 'firstname', 'lastname', 'email', 'password1', 'is_website_terms_of_use_accepted']]);
+        $user->password = $user->password1;
+
+        if ($this->request->getData('code')) {
+            $this->loadModel('Families');
+            $family = $this->Families->find()->where(['Families.code' => $this->request->getData('code')])->first();
+            if ($family) {
+                $user->family_id = $family->id;
+            } else {
+                $this->api_response_code = 400;
+                $this->api_response_flash = "Code famille invalide";
+            }
+        }
+
+        if ($this->api_response_code != 400) {
+            if ($r = $this->Users->save($user)) :
+
+                $url = $this->shortUrl(WEBSITE_URL . 'auth/email-validation?email=' . $user->email . '&token=' . $user->token);
+                $email = new Email('default');
+                $email->setEmailFormat('html')
+                    ->setTo($user->email)
+                    ->setSubject(__("Deliryades - Création de votre compte"))
+                    ->setTemplate('user_registration')
+                    ->setViewVars(['url' => $url, 'user' => $user, 'password' => $this->request->getData('password1')])
+                    ->send();
+                $this->api_response_flash = 'Vous allez recevoir un email de confirmation.';
+            else:
+                $this->api_response_code = 400;
+                $this->api_response_data['_form']['errors'] = Tools::getErrors($user->getErrors());
+            endif;
+        }
+
+    }
+
+    public function checkUserRegistration()
+    {
+        $this->request->allowMethod('post');
+
+        $this->loadModel('Users');
+        $user = $this->Users->find()->where(['email' => $this->request->getData('email'), 'token' => $this->request->getData('token'), 'registered' => 0])->first();
+
+        if ($user) {
+            $this->Users->query()->update()->set(['token' => Tools::_getRandomHash(), 'registered' => 1])->where(['id' => $user->id])->execute();
+            $this->api_response_flash = "Vous pouvez maintenant vous connecter";
+
+        } else {
+            $this->api_response_code = 405;
+            $this->api_response_flash = "Ce lien n'est plus valable";
+        }
+    }
 }
